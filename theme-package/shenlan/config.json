@@ -1,0 +1,40 @@
+{
+  "name": "shenlan",
+  "description": "深蓝现代用户主题",
+  "version": "1.0.5",
+  "configs": [
+    {
+      "label": "强调色",
+      "placeholder": "请选择主题强调色",
+      "field_name": "theme_color",
+      "field_type": "select",
+      "select_options": {
+        "electric_blue": "电光蓝",
+        "violet": "深空紫",
+        "cyan": "极光青"
+      },
+      "default_value": "electric_blue"
+    },
+    {
+      "label": "首页主标题",
+      "placeholder": "让每一次连接，都快人一步",
+      "field_name": "hero_title",
+      "field_type": "input",
+      "default_value": "让每一次连接，都快人一步"
+    },
+    {
+      "label": "首页说明",
+      "placeholder": "请输入首页介绍文案",
+      "field_name": "hero_description",
+      "field_type": "input",
+      "default_value": "低延迟全球网络、清晰的订阅管理和专注体验的客户端支持。"
+    },
+    {
+      "label": "自定义页脚 HTML",
+      "placeholder": "可加入客服脚本、统计代码等",
+      "field_name": "custom_html",
+      "field_type": "textarea",
+      "default_value": ""
+    }
+  ]
+}
