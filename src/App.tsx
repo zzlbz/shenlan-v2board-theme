@@ -56,6 +56,41 @@ function Empty({ icon: Icon = Icons.Inbox, title, description }: { icon?: typeof
 function Loading() { return <div className="loading"><i></i><span>正在同步数据</span></div> }
 function ErrorBox({ message }: { message: string }) { return <div className="error-box"><Icons.CircleAlert size={18}/>{message}</div> }
 
+function NoticeDialog({ notice, onClose }: { notice: NoticeItem | null; onClose: () => void }) {
+  useEffect(() => {
+    if (!notice) return
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose() }
+    document.body.style.overflow = 'hidden'
+    addEventListener('keydown', closeOnEscape)
+    return () => { document.body.style.overflow = ''; removeEventListener('keydown', closeOnEscape) }
+  }, [notice, onClose])
+  if (!notice) return null
+  return <div className="modal-layer notice-modal-layer" onMouseDown={onClose}>
+    <section className="notice-modal" role="dialog" aria-modal="true" aria-labelledby="notice-dialog-title" onMouseDown={(event) => event.stopPropagation()}>
+      <div className="notice-modal-heading"><div><span><Icons.Megaphone/></span><div><small>网站公告</small><h2 id="notice-dialog-title">{notice.title}</h2></div></div><button type="button" aria-label="关闭公告" onClick={onClose}><Icons.X/></button></div>
+      <div className="notice-modal-meta"><Icons.CalendarDays/>{formatDate(notice.created_at, true)}</div>
+      <div className="notice-modal-content" dangerouslySetInnerHTML={{ __html: safeHtml(notice.content || '') }}></div>
+      <div className="notice-modal-actions"><button type="button" className="primary" onClick={onClose}>我知道了</button></div>
+    </section>
+  </div>
+}
+
+function BackToTop() {
+  const [visible, setVisible] = useState(() => window.scrollY > 360)
+  useEffect(() => {
+    const update = () => setVisible(window.scrollY > 360)
+    addEventListener('scroll', update, { passive: true })
+    update()
+    return () => removeEventListener('scroll', update)
+  }, [])
+  const scrollToTop = () => {
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
+    window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' })
+    if (!reducedMotion) setTimeout(() => { if (window.scrollY > 1) window.scrollTo({ top: 0, behavior: 'auto' }) }, 650)
+  }
+  return <button type="button" className={`back-to-top ${visible ? 'visible' : ''}`} aria-label="返回页面顶部" aria-hidden={!visible} tabIndex={visible ? 0 : -1} onClick={scrollToTop}><Icons.ArrowUpToLine/><span>顶部</span></button>
+}
+
 function RecaptchaBox({ siteKey, onToken }: { siteKey: string; onToken: (token: string) => void }) {
   const container = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -103,6 +138,8 @@ const navItems = [
 
 function DashboardShell({ route, navigate, user, reloadUser, notify }: { route: string; navigate: (path: string) => void; user: UserInfo; reloadUser: () => void; notify: Notify }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [activeNotice, setActiveNotice] = useState<NoticeItem | null>(null)
+  const notices = useLoad<NoticeItem[]>(() => api('/api/v1/user/notice/fetch', { params: { current: 1, pageSize: 100 } }))
   const current = route.startsWith('/checkout/') ? navItems[1] : route.startsWith('/payment/') ? navItems.find((item) => item.path === '/orders')! : navItems.find((item) => route.startsWith(item.path)) || navItems[0]
   const pageTitle = route.startsWith('/checkout/') ? '确认订单' : route.startsWith('/payment/') ? '支付订单' : current.label
   const logOut = () => { setAuth(''); navigate('/'); location.reload() }
@@ -113,19 +150,22 @@ function DashboardShell({ route, navigate, user, reloadUser, notify }: { route: 
     addEventListener('keydown', closeOnEscape)
     return () => { document.body.style.overflow = ''; removeEventListener('keydown', closeOnEscape) }
   }, [mobileOpen])
+  useEffect(() => {
+    const popupNotice = notices.data?.find((notice) => Array.isArray(notice.tags) && notice.tags.includes('弹窗'))
+    if (popupNotice) setActiveNotice(popupNotice)
+  }, [notices.data])
   return <div className="dashboard-shell"><header className="topbar"><Logo compact onClick={() => navigate('/dashboard')}/><nav>{navItems.slice(0, 7).map((item) => <button className={current.path === item.path ? 'active' : ''} key={item.path} onClick={() => navigate(item.path)}><item.icon size={18}/>{item.label}</button>)}</nav><div className="top-actions"><button className="icon-button" aria-label="打开服务工单" onClick={() => navigate('/tickets')}><Icons.Bell size={18}/></button><button className="avatar" aria-label="打开用户中心" onClick={() => navigate('/account')}>{user.email.slice(0, 1).toUpperCase()}</button><button className="mobile-menu" aria-label={mobileOpen ? '关闭功能菜单' : '打开功能菜单'} aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}>{mobileOpen ? <Icons.X size={20}/> : <Icons.Menu size={20}/>}</button></div></header>
     {mobileOpen && <button className="mobile-backdrop" aria-label="关闭功能菜单" onClick={() => setMobileOpen(false)}></button>}
     <div className={`mobile-drawer ${mobileOpen ? 'open' : ''}`}>{navItems.map((item) => <button className={current.path === item.path ? 'active' : ''} onClick={() => { navigate(item.path); setMobileOpen(false) }} key={item.path}><item.icon/>{item.label}</button>)}<button onClick={logOut}><Icons.LogOut/>退出登录</button></div>
     <main className="app-main"><div className="page-heading"><h1>{pageTitle}</h1><div className="breadcrumb"><Icons.Home size={14}/> 首页 <Icons.ChevronRight size={14}/> {pageTitle}</div></div>
-      {route.startsWith('/dashboard') && <DashboardPage navigate={navigate} notify={notify}/>} {route.startsWith('/store') && <StorePage navigate={navigate}/>} {route.startsWith('/checkout/') && <CheckoutPage planId={Number(route.split('/')[2])} user={user} notify={notify} navigate={navigate}/>} {route.startsWith('/payment/') && <PaymentPage tradeNo={decodeURIComponent(route.split('/')[2] || '')} notify={notify} navigate={navigate}/>} {route.startsWith('/nodes') && <NodesPage/>} {route.startsWith('/knowledge') && <KnowledgePage/>} {route.startsWith('/invite') && <InvitePage notify={notify}/>} {route.startsWith('/deposit') && <DepositPage user={user} reloadUser={reloadUser} notify={notify} navigate={navigate}/>} {route.startsWith('/traffic') && <TrafficPage/>} {route.startsWith('/orders') && <OrdersPage notify={notify} navigate={navigate}/>} {route.startsWith('/tickets') && <TicketsPage notify={notify}/>} {route.startsWith('/account') && <AccountPage user={user} reloadUser={reloadUser} notify={notify} logOut={logOut}/>} 
-    </main><footer><Logo compact/><span>{settings.description || '稳定、安全、快速地连接世界'}</span><small>© {new Date().getFullYear()} {brand}</small></footer></div>
+      {route.startsWith('/dashboard') && <DashboardPage navigate={navigate} notify={notify} notices={notices.data || []} noticesError={notices.error} openNotice={setActiveNotice}/>} {route.startsWith('/store') && <StorePage navigate={navigate}/>} {route.startsWith('/checkout/') && <CheckoutPage planId={Number(route.split('/')[2])} user={user} notify={notify} navigate={navigate}/>} {route.startsWith('/payment/') && <PaymentPage tradeNo={decodeURIComponent(route.split('/')[2] || '')} notify={notify} navigate={navigate}/>} {route.startsWith('/nodes') && <NodesPage/>} {route.startsWith('/knowledge') && <KnowledgePage/>} {route.startsWith('/invite') && <InvitePage notify={notify}/>} {route.startsWith('/deposit') && <DepositPage user={user} reloadUser={reloadUser} notify={notify} navigate={navigate}/>} {route.startsWith('/traffic') && <TrafficPage/>} {route.startsWith('/orders') && <OrdersPage notify={notify} navigate={navigate}/>} {route.startsWith('/tickets') && <TicketsPage notify={notify}/>} {route.startsWith('/account') && <AccountPage user={user} reloadUser={reloadUser} notify={notify} logOut={logOut}/>}</main><footer><Logo compact/><span>{settings.description || '稳定、安全、快速地连接世界'}</span><small>© {new Date().getFullYear()} {brand}</small></footer><NoticeDialog notice={activeNotice} onClose={() => setActiveNotice(null)}/></div>
 }
 
-function DashboardPage({ navigate, notify }: { navigate: (path: string) => void; notify: Notify }) {
-  const data = useLoad(async () => { const [subscribe, notices, stat] = await Promise.all([api<SubscribeInfo>('/api/v1/user/getSubscribe'), api<NoticeItem[]>('/api/v1/user/notice/fetch', { params: { current: 1, pageSize: 4 } }), api<number[]>('/api/v1/user/getStat')]); return { subscribe, notices, stat } })
+function DashboardPage({ navigate, notify, notices, noticesError, openNotice }: { navigate: (path: string) => void; notify: Notify; notices: NoticeItem[]; noticesError: string; openNotice: (notice: NoticeItem) => void }) {
+  const data = useLoad(async () => { const [subscribe, stat] = await Promise.all([api<SubscribeInfo>('/api/v1/user/getSubscribe'), api<number[]>('/api/v1/user/getStat')]); return { subscribe, stat } })
   if (data.error) return <ErrorBox message={data.error}/>
   if (!data.data) return <Loading/>
-  const { subscribe, notices, stat } = data.data
+  const { subscribe, stat } = data.data
   const used = subscribe.u + subscribe.d
   const percent = subscribe.transfer_enable ? Math.min(100, Math.round(used / subscribe.transfer_enable * 100)) : 0
   const copySubscribe = async () => {
@@ -134,7 +174,7 @@ function DashboardPage({ navigate, notify }: { navigate: (path: string) => void;
     catch { notify('复制失败，请手动复制订阅链接', 'error') }
   }
   return <><section className="welcome compact-welcome"><div><h2>你好，{subscribe.email.split('@')[0]}</h2><p>订阅状态与常用操作都已经为你整理好了。</p></div><div className="system-status"><i></i><div><strong>账户数据已同步</strong><span>当前信息来自面板接口</span></div><Icons.ShieldCheck/></div></section>
-    <section className="panel dashboard-notices"><div className="card-title"><div><Icons.Megaphone size={20}/><h3>最新公告</h3></div></div>{notices.length ? <div className="notice-list">{notices.map((notice) => <div className="notice" key={notice.id}><span></span><div><strong>{notice.title}</strong><p>{notice.content.replace(/<[^>]*>/g, '').slice(0, 78)}</p></div><time>{formatDate(notice.created_at)}</time></div>)}</div> : <Empty title="暂无公告"/>}</section>
+    <section className="panel dashboard-notices"><div className="card-title"><div><Icons.Megaphone size={20}/><h3>最新公告</h3></div><span>{notices.length ? `共 ${notices.length} 条` : ''}</span></div>{noticesError ? <ErrorBox message={noticesError}/> : notices.length ? <div className="notice-list">{notices.slice(0, 4).map((notice) => <article className="notice" key={notice.id}><span></span><div><strong>{notice.title}</strong><p>{notice.content.replace(/<[^>]*>/g, '').slice(0, 78)}</p><button type="button" className="notice-detail" onClick={() => openNotice(notice)}><Icons.Eye/>查看详情</button></div><time>{formatDate(notice.created_at)}</time></article>)}</div> : <Empty title="暂无公告"/>}</section>
     <section className="hero-grid"><article className="subscription-card"><div className="card-heading"><div><span className="soft-icon"><Icons.Zap size={20}/></span><div><small>当前订阅</small><h2>{subscribe.plan?.name || '尚未订阅套餐'}</h2></div></div><span className={`status-pill ${!subscribe.plan ? 'muted' : ''}`}>{subscribe.plan ? '运行中' : '未激活'}</span></div>{subscribe.plan ? <><div className="usage-row"><div className="usage-dial" style={{ background: `conic-gradient(var(--primary) 0 ${percent}%,rgba(111,137,178,.16) ${percent}% 100%)` }}><span>{percent}<small>%</small></span></div><div className="usage-copy"><strong>已使用 {formatBytes(used)}</strong><span>本周期共 {formatBytes(subscribe.transfer_enable)}</span><div className="meter"><i style={{ width: `${percent}%` }}></i></div><small>{subscribe.reset_day === null ? '流量不自动重置' : `距离重置还有 ${subscribe.reset_day} 天`}</small></div></div><div className="subscription-meta"><div><span>到期时间</span><strong>{formatDate(subscribe.expired_at)}</strong></div><div><span>在线设备</span><strong>{subscribe.alive_ip} / {subscribe.device_limit || '∞'}</strong></div><div><span>可用流量</span><strong>{formatBytes(Math.max(0, subscribe.transfer_enable - used))}</strong></div></div></> : <Empty icon={Icons.PackageOpen} title="还没有激活套餐" description="选择适合你的方案，解锁订阅与节点。"/>}</article>
       <article className="quick-card"><div className="card-title"><div><Icons.Download size={20}/><h3>快速连接</h3></div><button onClick={data.reload}><Icons.RefreshCw size={16}/></button></div><div className="subscribe-box"><span>你的订阅链接</span><code>{subscribe.subscribe_url || '购买套餐后生成'}</code><button disabled={!subscribe.subscribe_url} onClick={copySubscribe}><Icons.Copy size={16}/>复制订阅链接</button></div><div className="platforms"><button onClick={() => navigate('/knowledge')}><b>W</b><span>Windows</span></button><button onClick={() => navigate('/knowledge')}><b>M</b><span>macOS</span></button><button onClick={() => navigate('/knowledge')}><b>i</b><span>iOS</span></button><button onClick={() => navigate('/knowledge')}><b>A</b><span>Android</span></button></div></article></section>
     <section className="stats-grid"><button onClick={() => navigate('/orders')}><span className="stat-icon blue"><Icons.ReceiptText/></span><div><small>待处理订单</small><strong>{stat[0] || 0} <em>笔</em></strong><span>查看订单记录</span></div></button><button onClick={() => navigate('/tickets')}><span className="stat-icon violet"><Icons.MessageSquareText/></span><div><small>进行中工单</small><strong>{stat[1] || 0} <em>个</em></strong><span>技术支持</span></div></button><button onClick={() => navigate('/invite')}><span className="stat-icon cyan"><Icons.Users/></span><div><small>成功邀请</small><strong>{stat[2] || 0} <em>人</em></strong><span>邀请好友使用</span></div></button><button onClick={() => navigate('/store')}><span className="stat-icon green"><Icons.CalendarClock/></span><div><small>剩余有效期</small><strong>{subscribe.expired_at ? Math.max(0, Math.ceil((subscribe.expired_at - Date.now() / 1000) / 86400)) : '∞'} <em>天</em></strong><span>保持服务连续</span></div></button></section>
@@ -331,5 +371,5 @@ export default function App() {
   else if (user.error) content = <div className="standalone-error"><Logo/><ErrorBox message={user.error}/><button onClick={() => { setAuth(''); setLoggedIn(false); navigate('/') }}>返回首页</button></div>
   else if (!user.data) content = <div className="splash"><Logo/><Loading/></div>
   else content = <DashboardShell route={route} navigate={navigate} user={user.data} reloadUser={user.reload} notify={notify}/>
-  return <>{content}{toast && <div className={`toast ${toast.kind}`}><span>{toast.kind === 'success' ? <Icons.Check/> : <Icons.CircleAlert/>}</span>{toast.message}</div>}</>
+  return <>{content}<BackToTop/>{toast && <div className={`toast ${toast.kind}`}><span>{toast.kind === 'success' ? <Icons.Check/> : <Icons.CircleAlert/>}</span>{toast.message}</div>}</>
 }

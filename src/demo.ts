@@ -18,7 +18,7 @@ export const demoNodes: ServerNode[] = [
   { id: 6, name: '澳大利亚 · Sydney 02', type: 'shadowsocks', rate: '2', tags: ['低负载'], is_online: 1, last_check_at: now - 28 }
 ]
 export const demoNotices: NoticeItem[] = [
-  { id: 1, title: '香港核心节点维护完成', content: '相关线路已经恢复，系统将自动选择最佳节点。', created_at: now - 3600 },
+  { id: 1, title: '香港核心节点维护完成', content: '<p>相关线路已经恢复，系统将自动选择最佳节点。</p><p>如果客户端仍显示旧状态，请先更新订阅后重新连接。</p>', tags: ['弹窗'], created_at: now - 3600 },
   { id: 2, title: '新增新加坡高速线路', content: 'Pro 与 Ultra 套餐用户可以立即使用。', created_at: now - 86400 * 2 },
   { id: 3, title: '客户端版本更新提醒', content: '建议升级至最新版本以获得更稳定的连接体验。', created_at: now - 86400 * 5 }
 ]

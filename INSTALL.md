@@ -35,8 +35,8 @@ public/theme/shenlan
 ```text
 public/theme/shenlan/config.json
 public/theme/shenlan/dashboard.blade.php
-public/theme/shenlan/assets/app-1.0.5.js
-public/theme/shenlan/assets/app-1.0.5.css
+public/theme/shenlan/assets/app-1.0.6.js
+public/theme/shenlan/assets/app-1.0.6.css
 ```
 
 请避免形成下面这种重复嵌套：
@@ -60,8 +60,8 @@ public/theme/shenlan/shenlan/config.json
 查看页面源代码，确认静态资源地址包含：
 
 ```text
-/theme/shenlan/assets/app-1.0.5.js?v=shenlan-1.0.5
-/theme/shenlan/assets/app-1.0.5.css?v=shenlan-1.0.5
+/theme/shenlan/assets/app-1.0.6.js?v=shenlan-1.0.6
+/theme/shenlan/assets/app-1.0.6.css?v=shenlan-1.0.6
 ```
 
 如果仍然加载旧资源，请依次检查：
@@ -80,7 +80,7 @@ public/theme/nova       旧版回滚目录
 public/theme/shenlan    新版主题目录
 ```
 
-上传完成后在后台切换到 `shenlan`。1.0.5 保留旧版登录状态读取兼容，正常情况下升级不会强制用户重新登录。
+上传完成后在后台切换到 `shenlan`。1.0.6 保留旧版登录状态读取兼容，正常情况下升级不会强制用户重新登录。
 
 ## 六、上线验证
 
@@ -95,6 +95,8 @@ public/theme/shenlan    新版主题目录
 - 节点、文档、邀请奖励和流量明细
 - 我的订单、服务工单和用户中心
 - 桌面顶部导航及手机菜单收回
+- 后台标记“弹窗”的公告自动弹出、详情打开和关闭
+- 长页面滚动后显示返回顶部按钮，并能够回到页面顶部
 
 主题本地演示只能验证前端流程，真实支付和余额到账必须在已配置支付网关的测试环境中验证。
 

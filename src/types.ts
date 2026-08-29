@@ -91,7 +91,15 @@ export interface ServerNode {
   is_online?: number
 }
 
-export interface NoticeItem { id: number; title: string; content: string; created_at: number; updated_at?: number }
+export interface NoticeItem {
+  id: number
+  title: string
+  content: string
+  created_at: number
+  updated_at?: number
+  img_url?: string | null
+  tags?: string[] | null
+}
 export interface KnowledgeItem { id: number; category: string; title: string; updated_at: number; body?: string }
 export interface InviteCode { id: number; code: string; status?: number }
 export interface InviteData { codes: InviteCode[]; stat: [number, number, number, number, number] }
