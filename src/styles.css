@@ -277,7 +277,7 @@ html,body{overflow-x:hidden}
   .payment-page .checkout-intro{margin-bottom:14px}
 }
 
-/* Shenlan 1.0.6 notices, back-to-top and elevated interactions */
+/* Notices, back-to-top and elevated interactions */
 button{transition:transform .18s ease,box-shadow .18s ease,filter .18s ease,border-color .18s ease,background-color .18s ease}
 @media(hover:hover){
   button:not(:disabled):not(.mobile-backdrop):hover{transform:translateY(-2px);filter:brightness(1.07);box-shadow:0 10px 24px rgba(3,10,22,.24)}
@@ -336,4 +336,37 @@ button:focus-visible{outline:2px solid var(--primary-bright);outline-offset:3px}
 
 @media(prefers-reduced-motion:reduce){
   button,.back-to-top{transition:none!important;scroll-behavior:auto}
+}
+
+/* Shenlan 1.0.7 subscription QR import */
+.subscribe-box .subscribe-actions{display:grid;gap:9px}
+.subscribe-box .subscribe-actions>button{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;justify-content:stretch;gap:12px;padding:10px 12px;border:1px solid rgba(91,145,255,.14);background:rgba(21,37,61,.72);color:inherit;text-align:left}
+.subscribe-box .subscribe-actions>button:hover{border-color:rgba(91,145,255,.34)}
+.subscribe-box .subscribe-actions>button:disabled{opacity:.48;cursor:not-allowed}
+.subscribe-box .subscribe-actions>button>span:last-child{display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:3px}
+.subscribe-box .subscribe-actions strong{font-size:12px;color:#edf4ff}
+.subscribe-box .subscribe-actions small{font-size:9px;color:var(--muted)}
+.subscribe-action-icon{width:42px;height:42px;display:grid!important;place-items:center;border-radius:10px}
+.subscribe-action-icon svg{width:18px;height:18px}
+.subscribe-action-icon.copy{background:rgba(53,119,246,.15);color:#6ea4ff}
+.subscribe-action-icon.qr{background:rgba(52,211,153,.13);color:#55dda9}
+
+.subscription-qr-layer{z-index:115}
+.subscription-qr-modal{width:min(390px,100%);border:1px solid rgba(91,145,255,.18);background:linear-gradient(150deg,#18263a,#111a29);border-radius:18px;overflow:hidden;box-shadow:0 38px 110px rgba(0,0,0,.56)}
+.subscription-qr-heading{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
+.subscription-qr-heading h2{margin:0;font-size:17px}
+.subscription-qr-heading button{width:34px;height:34px;display:grid;place-items:center;border:0;background:transparent;color:var(--muted);border-radius:9px;cursor:pointer}
+.subscription-qr-heading svg{width:19px;height:19px}
+.subscription-qr-content{display:flex;align-items:center;flex-direction:column;padding:30px 24px 26px}
+.subscription-qr-content img{display:block;width:min(260px,100%);height:auto;padding:10px;background:#fff;border-radius:13px;box-shadow:0 16px 45px rgba(0,0,0,.28)}
+.subscription-qr-content p{margin:17px 0 0;color:var(--muted);font-size:11px;text-align:center}
+
+@media(max-width:650px){
+  .subscribe-box .subscribe-actions>button{grid-template-columns:40px minmax(0,1fr);padding:9px 10px}
+  .subscribe-action-icon{width:40px;height:40px}
+  .subscription-qr-layer{padding:14px}
+  .subscription-qr-modal{border-radius:15px}
+  .subscription-qr-heading{padding:16px}
+  .subscription-qr-content{padding:24px 18px 22px}
+  .subscription-qr-content img{width:min(250px,100%)}
 }

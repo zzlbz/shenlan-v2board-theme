@@ -91,6 +91,23 @@ function BackToTop() {
   return <button type="button" className={`back-to-top ${visible ? 'visible' : ''}`} aria-label="返回页面顶部" aria-hidden={!visible} tabIndex={visible ? 0 : -1} onClick={scrollToTop}><Icons.ArrowUpToLine/><span>顶部</span></button>
 }
 
+function SubscriptionQrDialog({ image, onClose }: { image: string; onClose: () => void }) {
+  useEffect(() => {
+    if (!image) return
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose() }
+    document.body.style.overflow = 'hidden'
+    addEventListener('keydown', closeOnEscape)
+    return () => { document.body.style.overflow = ''; removeEventListener('keydown', closeOnEscape) }
+  }, [image, onClose])
+  if (!image) return null
+  return <div className="modal-layer subscription-qr-layer" onMouseDown={onClose}>
+    <section className="subscription-qr-modal" role="dialog" aria-modal="true" aria-labelledby="subscription-qr-title" onMouseDown={(event) => event.stopPropagation()}>
+      <div className="subscription-qr-heading"><h2 id="subscription-qr-title">扫描二维码订阅</h2><button type="button" aria-label="关闭订阅二维码" onClick={onClose}><Icons.X/></button></div>
+      <div className="subscription-qr-content"><img src={image} alt="订阅链接二维码"/><p>使用客户端扫描二维码，即可导入当前订阅。</p></div>
+    </section>
+  </div>
+}
+
 function RecaptchaBox({ siteKey, onToken }: { siteKey: string; onToken: (token: string) => void }) {
   const container = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -163,6 +180,8 @@ function DashboardShell({ route, navigate, user, reloadUser, notify }: { route: 
 
 function DashboardPage({ navigate, notify, notices, noticesError, openNotice }: { navigate: (path: string) => void; notify: Notify; notices: NoticeItem[]; noticesError: string; openNotice: (notice: NoticeItem) => void }) {
   const data = useLoad(async () => { const [subscribe, stat] = await Promise.all([api<SubscribeInfo>('/api/v1/user/getSubscribe'), api<number[]>('/api/v1/user/getStat')]); return { subscribe, stat } })
+  const [subscriptionQr, setSubscriptionQr] = useState('')
+  const [creatingQr, setCreatingQr] = useState(false)
   if (data.error) return <ErrorBox message={data.error}/>
   if (!data.data) return <Loading/>
   const { subscribe, stat } = data.data
@@ -173,10 +192,17 @@ function DashboardPage({ navigate, notify, notices, noticesError, openNotice }: 
     try { await navigator.clipboard.writeText(subscribe.subscribe_url); notify('复制成功') }
     catch { notify('复制失败，请手动复制订阅链接', 'error') }
   }
+  const showSubscriptionQr = async () => {
+    if (!subscribe.subscribe_url || creatingQr) return
+    setCreatingQr(true)
+    try { setSubscriptionQr(await QRCode.toDataURL(subscribe.subscribe_url, { width: 320, margin: 2, errorCorrectionLevel: 'M', color: { dark: '#06101f', light: '#ffffff' } })) }
+    catch { notify('二维码生成失败，请使用复制订阅地址', 'error') }
+    finally { setCreatingQr(false) }
+  }
   return <><section className="welcome compact-welcome"><div><h2>你好，{subscribe.email.split('@')[0]}</h2><p>订阅状态与常用操作都已经为你整理好了。</p></div><div className="system-status"><i></i><div><strong>账户数据已同步</strong><span>当前信息来自面板接口</span></div><Icons.ShieldCheck/></div></section>
     <section className="panel dashboard-notices"><div className="card-title"><div><Icons.Megaphone size={20}/><h3>最新公告</h3></div><span>{notices.length ? `共 ${notices.length} 条` : ''}</span></div>{noticesError ? <ErrorBox message={noticesError}/> : notices.length ? <div className="notice-list">{notices.slice(0, 4).map((notice) => <article className="notice" key={notice.id}><span></span><div><strong>{notice.title}</strong><p>{notice.content.replace(/<[^>]*>/g, '').slice(0, 78)}</p><button type="button" className="notice-detail" onClick={() => openNotice(notice)}><Icons.Eye/>查看详情</button></div><time>{formatDate(notice.created_at)}</time></article>)}</div> : <Empty title="暂无公告"/>}</section>
     <section className="hero-grid"><article className="subscription-card"><div className="card-heading"><div><span className="soft-icon"><Icons.Zap size={20}/></span><div><small>当前订阅</small><h2>{subscribe.plan?.name || '尚未订阅套餐'}</h2></div></div><span className={`status-pill ${!subscribe.plan ? 'muted' : ''}`}>{subscribe.plan ? '运行中' : '未激活'}</span></div>{subscribe.plan ? <><div className="usage-row"><div className="usage-dial" style={{ background: `conic-gradient(var(--primary) 0 ${percent}%,rgba(111,137,178,.16) ${percent}% 100%)` }}><span>{percent}<small>%</small></span></div><div className="usage-copy"><strong>已使用 {formatBytes(used)}</strong><span>本周期共 {formatBytes(subscribe.transfer_enable)}</span><div className="meter"><i style={{ width: `${percent}%` }}></i></div><small>{subscribe.reset_day === null ? '流量不自动重置' : `距离重置还有 ${subscribe.reset_day} 天`}</small></div></div><div className="subscription-meta"><div><span>到期时间</span><strong>{formatDate(subscribe.expired_at)}</strong></div><div><span>在线设备</span><strong>{subscribe.alive_ip} / {subscribe.device_limit || '∞'}</strong></div><div><span>可用流量</span><strong>{formatBytes(Math.max(0, subscribe.transfer_enable - used))}</strong></div></div></> : <Empty icon={Icons.PackageOpen} title="还没有激活套餐" description="选择适合你的方案，解锁订阅与节点。"/>}</article>
-      <article className="quick-card"><div className="card-title"><div><Icons.Download size={20}/><h3>快速连接</h3></div><button onClick={data.reload}><Icons.RefreshCw size={16}/></button></div><div className="subscribe-box"><span>你的订阅链接</span><code>{subscribe.subscribe_url || '购买套餐后生成'}</code><button disabled={!subscribe.subscribe_url} onClick={copySubscribe}><Icons.Copy size={16}/>复制订阅链接</button></div><div className="platforms"><button onClick={() => navigate('/knowledge')}><b>W</b><span>Windows</span></button><button onClick={() => navigate('/knowledge')}><b>M</b><span>macOS</span></button><button onClick={() => navigate('/knowledge')}><b>i</b><span>iOS</span></button><button onClick={() => navigate('/knowledge')}><b>A</b><span>Android</span></button></div></article></section>
+      <article className="quick-card"><div className="card-title"><div><Icons.Download size={20}/><h3>快速连接</h3></div><button onClick={data.reload}><Icons.RefreshCw size={16}/></button></div><div className="subscribe-box"><span>你的订阅链接</span><code>{subscribe.subscribe_url || '购买套餐后生成'}</code><div className="subscribe-actions"><button disabled={!subscribe.subscribe_url} onClick={copySubscribe}><span className="subscribe-action-icon copy"><Icons.Copy/></span><span><strong>复制订阅地址</strong><small>复制订阅链接到剪贴板</small></span></button><button disabled={!subscribe.subscribe_url || creatingQr} onClick={showSubscriptionQr}><span className="subscribe-action-icon qr"><Icons.QrCode/></span><span><strong>{creatingQr ? '正在生成二维码' : '扫描二维码订阅'}</strong><small>使用客户端扫描二维码导入</small></span></button></div></div><div className="platforms"><button onClick={() => navigate('/knowledge')}><b>W</b><span>Windows</span></button><button onClick={() => navigate('/knowledge')}><b>M</b><span>macOS</span></button><button onClick={() => navigate('/knowledge')}><b>i</b><span>iOS</span></button><button onClick={() => navigate('/knowledge')}><b>A</b><span>Android</span></button></div></article></section><SubscriptionQrDialog image={subscriptionQr} onClose={() => setSubscriptionQr('')}/>
     <section className="stats-grid"><button onClick={() => navigate('/orders')}><span className="stat-icon blue"><Icons.ReceiptText/></span><div><small>待处理订单</small><strong>{stat[0] || 0} <em>笔</em></strong><span>查看订单记录</span></div></button><button onClick={() => navigate('/tickets')}><span className="stat-icon violet"><Icons.MessageSquareText/></span><div><small>进行中工单</small><strong>{stat[1] || 0} <em>个</em></strong><span>技术支持</span></div></button><button onClick={() => navigate('/invite')}><span className="stat-icon cyan"><Icons.Users/></span><div><small>成功邀请</small><strong>{stat[2] || 0} <em>人</em></strong><span>邀请好友使用</span></div></button><button onClick={() => navigate('/store')}><span className="stat-icon green"><Icons.CalendarClock/></span><div><small>剩余有效期</small><strong>{subscribe.expired_at ? Math.max(0, Math.ceil((subscribe.expired_at - Date.now() / 1000) / 86400)) : '∞'} <em>天</em></strong><span>保持服务连续</span></div></button></section>
     <section className="panel action-panel dashboard-actions"><div className="card-title"><div><Icons.Command size={20}/><h3>常用操作</h3></div></div><div className="action-grid"><button onClick={() => navigate('/store')}><span><Icons.ShoppingBag/></span><strong>购买套餐</strong><small>选择或续费订阅</small></button><button onClick={() => navigate('/nodes')}><span><Icons.Server/></span><strong>节点列表</strong><small>查看当前可用线路</small></button><button onClick={() => navigate('/traffic')}><span><Icons.ChartNoAxesColumnIncreasing/></span><strong>流量统计</strong><small>了解本月使用情况</small></button><button onClick={() => navigate('/orders')}><span><Icons.ReceiptText/></span><strong>我的订单</strong><small>查看订单与支付状态</small></button><button onClick={() => navigate('/tickets')}><span><Icons.Headphones/></span><strong>联系支持</strong><small>提交服务工单</small></button></div></section></>
 }
