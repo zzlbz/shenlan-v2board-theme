@@ -19,7 +19,7 @@
   <meta name="theme-color" content="{{ $shenlanOptions['accent'] }}">
   <meta name="description" content="{{ $description }}">
   <title>{{ $title }}</title>
-  <link rel="stylesheet" href="/theme/{{ $theme }}/assets/app-1.0.7.css?v=shenlan-1.0.7">
+  <link rel="stylesheet" href="/theme/{{ $theme }}/assets/app-1.0.8.css?v=shenlan-1.0.8">
   <script>
     window.routerBase = "/";
     window.settings = {
@@ -35,6 +35,6 @@
 <body>
   <div id="root"></div>
   {!! isset($theme_config['custom_html']) ? $theme_config['custom_html'] : '' !!}
-  <script type="module" src="/theme/{{ $theme }}/assets/app-1.0.7.js?v=shenlan-1.0.7"></script>
+  <script type="module" src="/theme/{{ $theme }}/assets/app-1.0.8.js?v=shenlan-1.0.8"></script>
 </body>
 </html>
