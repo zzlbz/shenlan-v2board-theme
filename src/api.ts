@@ -1,12 +1,19 @@
 import { demoCommissions, demoGuest, demoInvite, demoKnowledge, demoNodes, demoNotices, demoOrders, demoPlans, demoSubscribe, demoTickets, demoTraffic, demoUser, demoUserConfig } from './demo'
 
-const AUTH_KEY = 'SHENLAN_AUTH_DATA'
+import { backendUrl, normalizeBackend } from './backend'
+
+const configuredHost = window.settings?.host || ''
+// Separate login state when the same frontend is pointed at another backend.
+const authKey = () => configuredHost ? `SHENLAN_AUTH_DATA:${normalizeBackend(configuredHost)}` : 'SHENLAN_AUTH_DATA'
 const LEGACY_AUTH_KEY = 'NOVA_AUTH_DATA'
 export const isDemo = import.meta.env.DEV
-export const getAuth = () => localStorage.getItem(AUTH_KEY) || localStorage.getItem(LEGACY_AUTH_KEY) || ''
+export const getAuth = () => {
+  try { return localStorage.getItem(authKey()) || (!configuredHost ? localStorage.getItem(LEGACY_AUTH_KEY) : '') || '' }
+  catch { return '' }
+}
 export const setAuth = (value: string) => {
-  if (value) localStorage.setItem(AUTH_KEY, value)
-  else { localStorage.removeItem(AUTH_KEY); localStorage.removeItem(LEGACY_AUTH_KEY) }
+  if (value) localStorage.setItem(authKey(), value)
+  else { localStorage.removeItem(authKey()); if (!configuredHost) localStorage.removeItem(LEGACY_AUTH_KEY) }
 }
 
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value))
@@ -61,8 +68,9 @@ export async function apiEnvelope<T>(path: string, options: { method?: 'GET' | '
   const authData = getAuth()
   if (options.auth !== false && authData) headers.Authorization = authData
   if (method === 'POST') headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8'
-  const response = await fetch(method === 'GET' && query.size ? `${path}?${query}` : path, { method, headers, body: method === 'POST' ? query : undefined })
-  const payload = await response.json().catch(() => ({})) as { data?: T; type?: number; message?: string; errors?: Record<string, string[]> }
+  const endpoint = backendUrl(path, configuredHost)
+  const response = await fetch(method === 'GET' && query.size ? `${endpoint}?${query}` : endpoint, { method, headers, credentials: 'omit', body: method === 'POST' ? query : undefined })
+  const payload = await response.json().catch(() => { throw new Error('接口返回格式异常，请检查后端地址及 API 转发配置') }) as { data?: T; type?: number; message?: string; errors?: Record<string, string[]> }
   if (!response.ok) {
     const firstError = payload.errors ? Object.values(payload.errors).flat()[0] : undefined
     throw new Error(firstError || payload.message || `请求失败 (${response.status})`)

@@ -4,7 +4,7 @@ Shenlan（深蓝）是一套适配 [`wyx2685/v2board`](https://github.com/wyx268
 
 主题围绕订阅服务的日常使用重新组织了概览、套餐购买、订单支付、账户充值、节点、流量、文档、邀请奖励和用户中心，并针对桌面端与手机端完成响应式适配。
 
-> 当前版本：`1.0.8`<br>
+> 当前版本：`1.0.9`<br>
 > 主题标识：`shenlan`  
 > 主题介绍：深蓝现代用户主题
 
@@ -36,6 +36,8 @@ Shenlan（深蓝）是一套适配 [`wyx2685/v2board`](https://github.com/wyx268
 这是第三方用户主题，不修改 V2Board 数据库结构。账户、套餐、订单、支付、节点、文档和工单数据均来自面板原生 `/api/v1` 接口。
 
 ## 快速安装
+
+从 1.0.9 起同时提供独立静态前端包：上传到静态站点，修改 `env.js` 中的后端域名即可。支持跨域 API 和同域反向代理，详见 [前后端分离部署说明](DEPLOY-STANDALONE.md)。以下步骤适用于原面板内置主题方式。
 
 1. 备份服务器当前主题目录。
 2. 将 [`theme-package/shenlan`](theme-package/shenlan) 完整上传到 V2Board 的 `public/theme/`。
@@ -87,7 +89,7 @@ dist/assets/app.js
 dist/assets/app.css
 ```
 
-正式发布版同时保留版本化资源 `app-1.0.8.js` 和 `app-1.0.8.css`。`dashboard.blade.php` 只引用版本化文件，以避免浏览器继续使用旧缓存。
+正式发布版同时保留版本化资源 `app-1.0.9.js` 和 `app-1.0.9.css`。`dashboard.blade.php` 只引用版本化文件，以避免浏览器继续使用旧缓存。
 
 ## 仓库结构
 
@@ -109,9 +111,9 @@ dist/assets/app.css
 
 - 使用测试账户验证登录、套餐购买、充值、支付和订单状态。
 - 确认支付网关返回 URL 或二维码时页面行为正常。
-- 查看页面源代码，确认加载 `app-1.0.8.js?v=shenlan-1.0.8` 和 `app-1.0.8.css?v=shenlan-1.0.8`。
+- 查看页面源代码，确认加载 `app-1.0.9.js?v=shenlan-1.0.9` 和 `app-1.0.9.css?v=shenlan-1.0.9`。
 - 保留旧主题目录作为回滚副本，实际站点验证完成前不要永久删除。
 
 ## 版本记录
 
-当前发布版本为 `1.0.8`，详细变化请查看 [CHANGELOG.md](CHANGELOG.md)。
+当前发布版本为 `1.0.9`，详细变化请查看 [CHANGELOG.md](CHANGELOG.md)。

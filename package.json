@@ -1,9 +1,11 @@
 {
   "name": "shenlan-v2board-theme",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "node --test tests/backend.test.mjs",
+    "build:standalone": "tsc --noEmit -p tsconfig.app.json && vite build --mode standalone --configLoader runner",
     "dev": "vite --host 127.0.0.1 --configLoader runner",
     "build": "tsc --noEmit -p tsconfig.app.json && vite build --configLoader runner",
     "preview": "vite preview --host 127.0.0.1 --configLoader runner"

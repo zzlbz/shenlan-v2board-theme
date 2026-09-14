@@ -35,8 +35,8 @@ public/theme/shenlan
 ```text
 public/theme/shenlan/config.json
 public/theme/shenlan/dashboard.blade.php
-public/theme/shenlan/assets/app-1.0.8.js
-public/theme/shenlan/assets/app-1.0.8.css
+public/theme/shenlan/assets/app-1.0.9.js
+public/theme/shenlan/assets/app-1.0.9.css
 ```
 
 请避免形成下面这种重复嵌套：
@@ -60,8 +60,8 @@ public/theme/shenlan/shenlan/config.json
 查看页面源代码，确认静态资源地址包含：
 
 ```text
-/theme/shenlan/assets/app-1.0.8.js?v=shenlan-1.0.8
-/theme/shenlan/assets/app-1.0.8.css?v=shenlan-1.0.8
+/theme/shenlan/assets/app-1.0.9.js?v=shenlan-1.0.9
+/theme/shenlan/assets/app-1.0.9.css?v=shenlan-1.0.9
 ```
 
 如果仍然加载旧资源，请依次检查：
@@ -80,7 +80,7 @@ public/theme/nova       旧版回滚目录
 public/theme/shenlan    新版主题目录
 ```
 
-上传完成后在后台切换到 `shenlan`。1.0.8 保留旧版登录状态读取兼容，正常情况下升级不会强制用户重新登录。
+上传完成后在后台切换到 `shenlan`。1.0.9 保留旧版登录状态读取兼容，正常情况下升级不会强制用户重新登录。
 
 ## 六、上线验证
 

@@ -1,4 +1,5 @@
 export interface ThemeWindow {
+  host?: string
   title?: string
   logo?: string
   description?: string
