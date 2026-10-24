@@ -1,7 +1,7 @@
 {
   "name": "shenlan",
   "description": "深蓝现代用户主题",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "configs": [
     {
       "label": "强调色",

@@ -1,4 +1,4 @@
-# Shenlan 1.0.9 前后端分离部署
+# Shenlan 1.0.10 前后端分离部署
 
 支持 `wyx2685/v2board`（XiaoBoard）。原 `public/theme/shenlan` 安装方式继续可用。
 

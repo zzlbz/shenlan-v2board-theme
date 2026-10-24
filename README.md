@@ -4,9 +4,41 @@ Shenlan（深蓝）是一套适配 [`wyx2685/v2board`](https://github.com/wyx268
 
 主题围绕订阅服务的日常使用重新组织了概览、套餐购买、订单支付、账户充值、节点、流量、文档、邀请奖励和用户中心，并针对桌面端与手机端完成响应式适配。
 
-> 当前版本：`1.0.9`<br>
+> 当前版本：`1.0.10`<br>
 > 主题标识：`shenlan`  
 > 主题介绍：深蓝现代用户主题
+
+## 效果预览
+
+以下为主题真实界面截图，使用本地演示数据，套餐价格与用户信息仅作展示。
+
+**桌面端 · 概览**
+
+![Shenlan 桌面概览，展示公告、订阅用量、二维码入口和底部 GitHub 链接](docs/screenshots/desktop-dashboard.png)
+
+<details>
+<summary>查看订阅商店、订单确认和账户充值</summary>
+
+**订阅商店**
+
+![Shenlan 订阅商店](docs/screenshots/desktop-store.png)
+
+**订单确认**
+
+![Shenlan 订单确认](docs/screenshots/desktop-checkout.png)
+
+**账户充值**
+
+![Shenlan 账户充值](docs/screenshots/desktop-deposit.png)
+
+</details>
+
+**手机版 · 订阅与快速连接 / 订阅商店**
+
+<p>
+  <img src="docs/screenshots/mobile-subscription.png" width="300" alt="Shenlan 手机版订阅信息与快速连接" />
+  <img src="docs/screenshots/mobile-store.png" width="300" alt="Shenlan 手机版订阅商店" />
+</p>
 
 ## 主要功能
 
@@ -39,13 +71,13 @@ Shenlan（深蓝）是一套适配 [`wyx2685/v2board`](https://github.com/wyx268
 
 最新安装包：[GitHub Releases](https://github.com/zzlbz/shenlan-v2board-theme/releases/latest)。
 
-- 面板内置主题：下载 `shenlan-theme-1.0.9.zip`。
-- 前后端分离部署：下载 `shenlan-standalone-1.0.9.zip`。
-- 完整源码：下载 `shenlan-source-1.0.9.zip`，或直接克隆本仓库。
+- 面板内置主题：下载 `shenlan-theme-1.0.10.zip`。
+- 前后端分离部署：下载 `shenlan-standalone-1.0.10.zip`。
+- 完整源码：下载 `shenlan-source-1.0.10.zip`，或直接克隆本仓库。
 
 不要把 GitHub 自动生成的 Source code 压缩包直接作为静态网站部署包。
 
-从 1.0.9 起同时提供独立静态前端包：上传到静态站点，修改 `env.js` 中的后端域名即可。支持跨域 API 和同域反向代理，详见 [前后端分离部署说明](DEPLOY-STANDALONE.md)。以下步骤适用于原面板内置主题方式。
+从 1.0.10 起同时提供独立静态前端包：上传到静态站点，修改 `env.js` 中的后端域名即可。支持跨域 API 和同域反向代理，详见 [前后端分离部署说明](DEPLOY-STANDALONE.md)。以下步骤适用于原面板内置主题方式。
 
 1. 备份服务器当前主题目录。
 2. 将 [`theme-package/shenlan`](theme-package/shenlan) 完整上传到 V2Board 的 `public/theme/`。
@@ -97,7 +129,7 @@ dist/assets/app.js
 dist/assets/app.css
 ```
 
-正式发布版同时保留版本化资源 `app-1.0.9.js` 和 `app-1.0.9.css`。`dashboard.blade.php` 只引用版本化文件，以避免浏览器继续使用旧缓存。
+正式发布版同时保留版本化资源 `app-1.0.10.js` 和 `app-1.0.10.css`。`dashboard.blade.php` 只引用版本化文件，以避免浏览器继续使用旧缓存。
 
 ## 仓库结构
 
@@ -119,9 +151,9 @@ dist/assets/app.css
 
 - 使用测试账户验证登录、套餐购买、充值、支付和订单状态。
 - 确认支付网关返回 URL 或二维码时页面行为正常。
-- 查看页面源代码，确认加载 `app-1.0.9.js?v=shenlan-1.0.9` 和 `app-1.0.9.css?v=shenlan-1.0.9`。
+- 查看页面源代码，确认加载 `app-1.0.10.js?v=shenlan-1.0.10` 和 `app-1.0.10.css?v=shenlan-1.0.10`。
 - 保留旧主题目录作为回滚副本，实际站点验证完成前不要永久删除。
 
 ## 版本记录
 
-当前发布版本为 `1.0.9`，详细变化请查看 [CHANGELOG.md](CHANGELOG.md)。
+当前发布版本为 `1.0.10`，详细变化请查看 [CHANGELOG.md](CHANGELOG.md)。
