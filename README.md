@@ -37,6 +37,14 @@ Shenlan（深蓝）是一套适配 [`wyx2685/v2board`](https://github.com/wyx268
 
 ## 快速安装
 
+最新安装包：[GitHub Releases](https://github.com/zzlbz/shenlan-v2board-theme/releases/latest)。
+
+- 面板内置主题：下载 `shenlan-theme-1.0.9.zip`。
+- 前后端分离部署：下载 `shenlan-standalone-1.0.9.zip`。
+- 完整源码：下载 `shenlan-source-1.0.9.zip`，或直接克隆本仓库。
+
+不要把 GitHub 自动生成的 Source code 压缩包直接作为静态网站部署包。
+
 从 1.0.9 起同时提供独立静态前端包：上传到静态站点，修改 `env.js` 中的后端域名即可。支持跨域 API 和同域反向代理，详见 [前后端分离部署说明](DEPLOY-STANDALONE.md)。以下步骤适用于原面板内置主题方式。
 
 1. 备份服务器当前主题目录。
